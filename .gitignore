@@ -13,3 +13,4 @@
 .externalNativeBuild
 .cxx
 local.properties
+domain/src/main/java/com/nadimohammed/domain/entities/ToBeDeleted.kt
