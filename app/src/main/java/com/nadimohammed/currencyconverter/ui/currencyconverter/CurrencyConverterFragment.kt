@@ -6,12 +6,9 @@ import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import com.nadimohammed.currencyconverter.databinding.CurrencyConverterFragmentBinding
 import com.nadimohammed.currencyconverter.util.BaseFragment
-import com.nadimohammed.currencyconverter.util.Status
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -26,80 +23,55 @@ class CurrencyConverterFragment : BaseFragment<CurrencyConverterFragmentBinding>
         super.onViewCreated(view, savedInstanceState)
 
         observe()
-        loadFromSpinnerCurrency()
     }
 
 
     private fun observe() {
+        lifecycleScope.launch {
+            currencyConverterViewModel.currencyRate.collect {
+                Log.e("TestResponse1", it.toString())
+                Log.e("TestResponse2", it.rates.toString())
+            }
+        }
 
-        viewLifecycleOwner.lifecycleScope.launch {
+        lifecycleScope.launch {
 
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+            currencyConverterViewModel.spinnerData.collect {
+                Log.e("TestResponse2", it.toString())
 
-                currencyConverterViewModel.apiStatus.collect {
-                    when (it) {
-                        Status.SUCCESS -> {
-                            Log.e(
-                                "TestResponse",
-                                currencyConverterViewModel.currencyRate.toString()
-                            )
-                        }
+                val currencyCountryCode = arrayListOf<String>()
+                val currencyPrice = arrayListOf<String>()
 
-                        else -> {
-                            Log.e("TestResponseError", "Error")
+                for (i in 0 until it.size) {
+                    currencyCountryCode.add(it[i].currencyCountryCode)
+                    currencyPrice.add(it[i].currencyPrice)
+                }
+
+                val adapter = ArrayAdapter(
+                    requireContext(),
+                    androidx.appcompat.R.layout.support_simple_spinner_dropdown_item,
+                    currencyCountryCode
+                )
+
+                binding.fromSpinner.onItemSelectedListener =
+                    object : AdapterView.OnItemSelectedListener {
+                        override fun onNothingSelected(parent: AdapterView<*>?) {}
+
+                        override fun onItemSelected(
+                            parent: AdapterView<*>?,
+                            view: View?,
+                            position: Int,
+                            id: Long
+                        ) {
+                            val selectedCurrencyPrice =
+                                it[binding.fromSpinner.selectedItemPosition].currencyPrice
                         }
                     }
-                }
+
+                binding.fromSpinner.adapter = adapter
 
             }
         }
     }
-
-    private fun loadFromSpinnerCurrency() {
-
-        viewLifecycleOwner.lifecycleScope.launch {
-
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-
-                val currencyRate = arrayListOf<String>()
-
-                currencyConverterViewModel.currencyRate.collect {
-                    for (i in 0 until it.rates.size) {
-                        currencyRate.add(it.rates[i].toString())
-                        Log.e("LoopTest", it.rates[i].toString())
-                    }
-
-                    val adapter = ArrayAdapter(
-                        requireContext(),
-                        androidx.appcompat.R.layout.support_simple_spinner_dropdown_item,
-                        currencyRate
-                    )
-
-
-                    binding.fromSpinner.adapter = adapter
-
-                    binding.fromSpinner.onItemSelectedListener =
-                        object : AdapterView.OnItemSelectedListener {
-                            override fun onNothingSelected(parent: AdapterView<*>?) {
-
-                            }
-
-                            override fun onItemSelected(
-                                parent: AdapterView<*>?,
-                                view: View?,
-                                position: Int,
-                                id: Long
-                            ) {
-                                val currencyCode =
-                                    it.rates[binding.fromSpinner.selectedItemPosition]
-                                Log.e("currencyCode", currencyCode.toString())
-
-                            }
-                        }
-                }
-            }
-        }
-    }
-
 
 }
