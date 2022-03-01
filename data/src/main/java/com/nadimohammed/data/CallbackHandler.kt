@@ -1,4 +1,4 @@
-package data
+package com.nadimohammed.data
 
 import com.google.gson.Gson
 import com.nadimohammed.domain.Result
