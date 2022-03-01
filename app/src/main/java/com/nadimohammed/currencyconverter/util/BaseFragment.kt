@@ -1,4 +1,4 @@
-package com.nadimohammed.currencyconverter.ui.currencyconverter
+package com.nadimohammed.currencyconverter.util
 
 import android.os.Bundle
 import android.view.LayoutInflater
