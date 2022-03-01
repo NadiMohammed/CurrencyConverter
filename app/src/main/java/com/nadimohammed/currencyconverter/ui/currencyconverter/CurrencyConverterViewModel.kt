@@ -3,6 +3,7 @@ package com.nadimohammed.currencyconverter.ui.currencyconverter
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.gson.Gson
 import com.nadimohammed.currencyconverter.util.Status
 import com.nadimohammed.domain.Result
 import com.nadimohammed.domain.entities.currencyrate.CurrencyRateEntitie
@@ -13,6 +14,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import org.json.JSONObject
 import javax.inject.Inject
 
 @HiltViewModel
@@ -22,6 +24,9 @@ class CurrencyConverterViewModel @Inject constructor(private val getCurrencyRate
     private val _currencyRate = MutableSharedFlow<CurrencyRateEntitie>()
     val currencyRate: SharedFlow<CurrencyRateEntitie> = _currencyRate
 
+    private val _spinnerData = MutableStateFlow(ArrayList<SpinnerData>())
+    val spinnerData: StateFlow<ArrayList<SpinnerData>> = _spinnerData
+
     private val _apiStatus = MutableSharedFlow<Status>()
     val apiStatus: SharedFlow<Status> = _apiStatus
 
@@ -29,17 +34,35 @@ class CurrencyConverterViewModel @Inject constructor(private val getCurrencyRate
         loadCurrencyRate()
     }
 
-    fun loadCurrencyRate() {
+    private fun loadCurrencyRate() {
         viewModelScope.launch {
             _apiStatus.emit(Status.LOADING)
 
             try {
                 when (val result = getCurrencyRateUseCase.getCurrencyRate()) {
                     is Result.Success -> {
-                        currencyRate.emit(result.results!!)
-                        _apiStatus.emit(Status.SUCCESS)
+                        _currencyRate.emit(result.results!!)
 
+                        val timesJsonString = Gson().toJson(result.results!!.rates)
+                        val json = JSONObject(timesJsonString)
+                        val spinnerData: ArrayList<SpinnerData> = ArrayList()
+
+                        for (i in 0 until json.names().length()) {
+
+                            spinnerData.add(
+                                SpinnerData(
+                                    (json.names().getString(i)),
+
+                                    json.getString(json.names().getString(i))
+
+                                )
+                            )
+
+                        }
+                        _spinnerData.value = spinnerData
+                        _apiStatus.emit(Status.SUCCESS)
                     }
+
                     is Result.Failed -> {
                         _apiStatus.emit(Status.ERROR)
                     }
