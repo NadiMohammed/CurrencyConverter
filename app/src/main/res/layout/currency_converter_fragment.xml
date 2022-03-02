@@ -10,48 +10,52 @@
 
         <Spinner
             android:id="@+id/fromSpinner"
-            android:layout_width="100dp"
+            android:layout_width="110dp"
             android:layout_height="35dp"
-            android:layout_marginStart="60dp"
+            android:layout_marginStart="50dp"
             android:layout_marginTop="150dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/switchBtn"
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/switchImg"
             android:layout_width="50dp"
             android:layout_height="50dp"
-            android:layout_marginStart="20dp"
             android:layout_marginTop="148dp"
+            android:src="@drawable/ic_switch"
             app:layout_constraintEnd_toStartOf="@+id/toSpinner"
-            app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toEndOf="@+id/fromSpinner"
             app:layout_constraintTop_toTopOf="parent" />
 
         <Spinner
             android:id="@+id/toSpinner"
-            android:layout_width="100dp"
+            android:layout_width="110dp"
             android:layout_height="35dp"
             android:layout_marginTop="150dp"
-            android:layout_marginEnd="60dp"
+            android:layout_marginEnd="50dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/amountEdt"
-            android:layout_width="100dp"
+            android:layout_width="110dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="60dp"
+            android:layout_marginStart="50dp"
             android:layout_marginTop="100dp"
+            android:digits="0123456789."
+            android:inputType="phone"
+            android:text="1"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/fromSpinner" />
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/convertedValueEdt"
-            android:layout_width="100dp"
+            android:layout_width="110dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="100dp"
-            android:layout_marginEnd="60dp"
+            android:layout_marginEnd="50dp"
+            android:digits="0123456789."
+            android:inputType="phone"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/toSpinner" />
 
@@ -61,12 +65,13 @@
             android:layout_width="150dp"
             android:layout_height="50dp"
             android:layout_marginStart="20dp"
-            android:layout_marginTop="184dp"
             android:text="Details"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.456"
+            app:layout_constraintHorizontal_bias="0.499"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/switchBtn" />
+            app:layout_constraintTop_toBottomOf="@+id/switchBtn"
+            app:layout_constraintVertical_bias="0.809" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>
