@@ -43,8 +43,8 @@ class CurrencyConverterViewModel @Inject constructor(private val getCurrencyRate
                     is Result.Success -> {
                         _currencyRate.emit(result.results!!)
 
-                        val timesJsonString = Gson().toJson(result.results!!.rates)
-                        val json = JSONObject(timesJsonString)
+                        val ratesJsonString = Gson().toJson(result.results!!.rates)
+                        val json = JSONObject(ratesJsonString)
                         val spinnerData: ArrayList<SpinnerData> = ArrayList()
 
                         for (i in 0 until json.names().length()) {
@@ -52,13 +52,12 @@ class CurrencyConverterViewModel @Inject constructor(private val getCurrencyRate
                             spinnerData.add(
                                 SpinnerData(
                                     (json.names().getString(i)),
-
-                                    json.getString(json.names().getString(i))
-
+//                                    json.getString(json.names().getString(i))
+                                    json.getDouble(json.names().getString(i))
                                 )
                             )
-
                         }
+
                         _spinnerData.value = spinnerData
                         _apiStatus.emit(Status.SUCCESS)
                     }
@@ -69,6 +68,7 @@ class CurrencyConverterViewModel @Inject constructor(private val getCurrencyRate
                 }
 
             } catch (e: Exception) {
+                _apiStatus.emit(Status.ERROR)
                 Log.e("CurrencyConverterViewModel", e.toString())
             }
 
