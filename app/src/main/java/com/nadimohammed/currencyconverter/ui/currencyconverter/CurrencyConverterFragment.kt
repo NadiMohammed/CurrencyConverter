@@ -1,6 +1,8 @@
 package com.nadimohammed.currencyconverter.ui.currencyconverter
 
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.Log
 import android.view.MotionEvent
 import android.view.View
@@ -9,10 +11,15 @@ import android.widget.ArrayAdapter
 import androidx.core.widget.doOnTextChanged
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.findNavController
+import com.nadimohammed.currencyconverter.R
 import com.nadimohammed.currencyconverter.databinding.CurrencyConverterFragmentBinding
 import com.nadimohammed.currencyconverter.util.BaseFragment
+import com.nadimohammed.data.db.DatabaseCurrency
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.*
 
 @AndroidEntryPoint
 class CurrencyConverterFragment : BaseFragment<CurrencyConverterFragmentBinding>() {
@@ -23,8 +30,8 @@ class CurrencyConverterFragment : BaseFragment<CurrencyConverterFragmentBinding>
 
     private var selectedCurrencyPriceFromSpinner: Double = 0.0
     private var selectedCurrencyPriceToSpinner: Double = 0.0
-    private var selectedItemPositionFromSpinner =0
-    private var selectedItemPositionToSpinner =0
+    private var selectedItemPositionFromSpinner = 0
+    private var selectedItemPositionToSpinner = 0
     private var stopAmountEditTextChangedListener: Boolean = false
     private var swipeValueFromTo: Boolean = true
 
@@ -96,7 +103,7 @@ class CurrencyConverterFragment : BaseFragment<CurrencyConverterFragmentBinding>
                             selectedCurrencyPriceToSpinner =
                                 it[binding.toSpinner.selectedItemPosition].currencyPrice
 
-                         }
+                        }
                     }
 
                 binding.fromSpinner.adapter = spinnerAdapter
@@ -107,6 +114,10 @@ class CurrencyConverterFragment : BaseFragment<CurrencyConverterFragmentBinding>
     }
 
     private fun onClick() {
+
+        binding.DetailsBtn.setOnClickListener {
+            navigateToHistoricalDetails()
+        }
 
         binding.amountEdt.setOnTouchListener(object : View.OnTouchListener {
             override fun onTouch(v: View?, event: MotionEvent?): Boolean {
@@ -157,33 +168,79 @@ class CurrencyConverterFragment : BaseFragment<CurrencyConverterFragmentBinding>
             }
         }
 
-        binding.convertedValueEdt.doOnTextChanged { text, start, before, count ->
-            if (stopAmountEditTextChangedListener == true) { // Yes StopAmountEditTextChangedListener
+        binding.convertedValueEdt.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
 
-                if (!binding.convertedValueEdt.text.isNullOrEmpty()) {
-                    binding.amountEdt.setText(
-                        (binding.convertedValueEdt.text.toString()
-                            .toDouble() * selectedCurrencyPriceFromSpinner).toString()
-                    )
-                }
-
-            } else {
-                return@doOnTextChanged
             }
-        }
+
+            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+                if (stopAmountEditTextChangedListener == true) { // Yes StopAmountEditTextChangedListener
+
+                    if (!binding.convertedValueEdt.text.isNullOrEmpty()) {
+                        binding.amountEdt.setText(
+                            (binding.convertedValueEdt.text.toString()
+                                .toDouble() * selectedCurrencyPriceFromSpinner).toString()
+                        )
+                    }
+                }
+            }
+
+            override fun afterTextChanged(p0: Editable?) {
+                val sdf = SimpleDateFormat("dd/M/yyyy hh:mm:ss")
+                val currentDate = sdf.format(Date())
+
+                currencyConverterViewModel.saveConverted(
+                    DatabaseCurrency(
+                        currentDate.toString(),
+                        binding.fromSpinner.selectedItem.toString(),
+                        binding.toSpinner.selectedItem.toString(),
+                        binding.amountEdt.text.toString().toDouble(),
+                        binding.convertedValueEdt.text.toString().toDouble()
+                    )
+                )
+            }
+
+        })
+
+
+//        binding.convertedValueEdt.doOnTextChanged { text, start, before, count ->
+//            if (stopAmountEditTextChangedListener == true) { // Yes StopAmountEditTextChangedListener
+//
+//                if (!binding.convertedValueEdt.text.isNullOrEmpty()) {
+//                    binding.amountEdt.setText(
+//                        (binding.convertedValueEdt.text.toString()
+//                            .toDouble() * selectedCurrencyPriceFromSpinner).toString()
+//                    )
+//                }
+//
+//            } else {
+//                return@doOnTextChanged
+//            }
+//        }
 
         binding.switchImg.setOnClickListener {
             selectedItemPositionFromSpinner = binding.fromSpinner.selectedItemPosition
             selectedItemPositionToSpinner = binding.toSpinner.selectedItemPosition
             binding.fromSpinner.setSelection(selectedItemPositionToSpinner)
             binding.toSpinner.setSelection(selectedItemPositionFromSpinner)
-            binding.amountEdt.text  = binding.convertedValueEdt.text
+            binding.amountEdt.text = binding.convertedValueEdt.text
+
+//            val sdf = SimpleDateFormat("dd/M/yyyy hh:mm:ss")
+//            val currentDate = sdf.format(Date())
+//
+//            currencyConverterViewModel.saveConverted(DatabaseCurrency(currentDate.toString()))
 
             Log.e("getselectedItem1", binding.fromSpinner.selectedItem.toString())
             Log.e("getselectedItem2", selectedCurrencyPriceFromSpinner.toString())
             Log.e("getselectedItem3", selectedCurrencyPriceToSpinner.toString())
+//            Log.e("currentDate", currentDate.toString())
         }
 
+    }
+
+    private fun navigateToHistoricalDetails() {
+        requireView().findNavController()
+            .navigate(R.id.action_currencyConverterFragment_to_historicalDetailsFragment)
     }
 
 }
