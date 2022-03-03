@@ -52,7 +52,7 @@ class HistoricalDetailsFragment : BaseFragment<HistoricalDetailsFragmentBinding>
                 }
             }
         }
-        
+
     }
 
 
