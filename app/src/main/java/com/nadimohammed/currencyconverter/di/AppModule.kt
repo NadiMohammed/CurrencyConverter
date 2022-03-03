@@ -1,14 +1,19 @@
 package com.nadimohammed.currencyconverter.di
 
+import android.content.Context
 import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
 import com.nadimohammed.data.BuildConfig
+import androidx.room.Room
 import com.nadimohammed.data.api.CurrencyApi
+import com.nadimohammed.data.db.CurrencyDAO
+import com.nadimohammed.data.db.MainDatabase
 import com.nadimohammed.data.repository.CurrencyRemoteDataSource
 import com.nadimohammed.domain.repository.CurrencyRepository
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
@@ -60,10 +65,19 @@ object AppModule {
             .addCallAdapterFactory(CoroutineCallAdapterFactory())
             .build()
 
-
     @Singleton
     @Provides
     fun provideCurrencyApi(retrofit: Retrofit): CurrencyApi = retrofit.create(CurrencyApi::class.java)
+
+    @Provides
+    @Singleton
+    fun providesAppDatabase(@ApplicationContext context: Context): MainDatabase =
+        Room.databaseBuilder(context, MainDatabase::class.java, "MainDatabase")
+            .fallbackToDestructiveMigration().build()
+
+    @Provides
+    @Singleton
+    fun providesCurrencyDAO(db: MainDatabase): CurrencyDAO = db.currencyDAO
 
 }
 
