@@ -5,6 +5,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.gson.Gson
 import com.nadimohammed.currencyconverter.util.Status
+import com.nadimohammed.data.db.DatabaseCurrency
+import com.nadimohammed.data.repository.CurrencyLocalDataSourceImpl
 import com.nadimohammed.domain.Result
 import com.nadimohammed.domain.entities.currencyrate.CurrencyRateEntitie
 import com.nadimohammed.domain.usecases.GetCurrencyRateUseCase
@@ -18,7 +20,10 @@ import org.json.JSONObject
 import javax.inject.Inject
 
 @HiltViewModel
-class CurrencyConverterViewModel @Inject constructor(private val getCurrencyRateUseCase: GetCurrencyRateUseCase) :
+class CurrencyConverterViewModel @Inject constructor(
+    private val getCurrencyRateUseCase: GetCurrencyRateUseCase,
+    private val currencyLocalDataSourceImpl: CurrencyLocalDataSourceImpl
+) :
     ViewModel() {
 
     private val _currencyRate = MutableSharedFlow<CurrencyRateEntitie>()
@@ -72,6 +77,12 @@ class CurrencyConverterViewModel @Inject constructor(private val getCurrencyRate
                 Log.e("CurrencyConverterViewModel", e.toString())
             }
 
+        }
+    }
+
+    fun saveConverted(databaseCurrency: DatabaseCurrency) {
+        viewModelScope.launch {
+            currencyLocalDataSourceImpl.create(databaseCurrency)
         }
     }
 
