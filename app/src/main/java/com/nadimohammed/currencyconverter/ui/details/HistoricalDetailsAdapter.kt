@@ -11,10 +11,18 @@ import com.nadimohammed.data.db.DatabaseCurrency
 class HistoricalDetailsAdapter :
     ListAdapter<DatabaseCurrency, HistoricalDetailsAdapter.ViewHolder>(DiffCallback()) {
 
+    /*
+    * I use this function (submitList) to limit the displayed items to 30
+    */
+    override fun submitList(list: List<DatabaseCurrency>?) {
+        if (list?.size ?: 0 > 30) super.submitList(list?.take(30))
+        else super.submitList(list)
+    }
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         return ViewHolder(
             ItemHistoricalDetailsBinding.inflate(
-                 LayoutInflater.from(parent.context),
+                LayoutInflater.from(parent.context),
                 parent,
                 false
             )
@@ -28,6 +36,7 @@ class HistoricalDetailsAdapter :
     class ViewHolder(private val binding: ItemHistoricalDetailsBinding) :
         RecyclerView.ViewHolder(binding.root) {
         fun bind(item: DatabaseCurrency) {
+
             binding.apply {
                 dayTxt.text = item.day
                 fromCurrencyCodeTxt.text = item.fromCurrencyCode
@@ -37,6 +46,7 @@ class HistoricalDetailsAdapter :
             }
         }
     }
+
 }
 
 private class DiffCallback : DiffUtil.ItemCallback<DatabaseCurrency>() {
