@@ -8,7 +8,9 @@ import com.nadimohammed.data.db.DatabaseCurrency
 import com.nadimohammed.data.repository.CurrencyLocalDataSourceImpl
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -16,23 +18,34 @@ import javax.inject.Inject
 class HistoricalDetailsViewModel @Inject constructor(private val currencyLocalDataSourceImpl: CurrencyLocalDataSourceImpl) :
     ViewModel() {
 
-    private val _historicalDetails = MutableSharedFlow<List<DatabaseCurrency>>()
-    val historicalDetails: SharedFlow<List<DatabaseCurrency>> = _historicalDetails
+    private val _historicalDetails = MutableStateFlow<List<DatabaseCurrency>>(emptyList())
+    val historicalDetails: StateFlow<List<DatabaseCurrency>> = _historicalDetails
 
     private val _apiStatus = MutableSharedFlow<Status>()
     val apiStatus: SharedFlow<Status> = _apiStatus
 
+    private val _onMessageError = MutableSharedFlow<Exception>()
+    val onMessageError: SharedFlow<Exception> = _onMessageError
+
     init {
-        getHistoricalDetailsFromDB()
+        getLocalHistoricalDetailsFromDB()
     }
 
-    private fun getHistoricalDetailsFromDB() {
+    /*
+    * here i request from Room Database to get saved Converted currencies
+    * */
+    private fun getLocalHistoricalDetailsFromDB() {
         viewModelScope.launch {
-            _apiStatus.emit(Status.LOADING)
-            _historicalDetails.emit(currencyLocalDataSourceImpl.get())
-            Log.e("HistoricalDetailsViewModel","It Work")
-            _apiStatus.emit(Status.SUCCESS)
+            try {
+                _apiStatus.emit(Status.LOADING)
+                _historicalDetails.emit(currencyLocalDataSourceImpl.get())
+                _apiStatus.emit(Status.SUCCESS)
+            } catch (e: Exception) {
+                _onMessageError.emit(e)
+                _apiStatus.emit(Status.ERROR)
+            }
         }
+
     }
 
 }
