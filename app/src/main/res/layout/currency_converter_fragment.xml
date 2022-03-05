@@ -3,6 +3,13 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <data>
+
+        <variable
+            name="viewModel"
+            type="com.nadimohammed.currencyconverter.ui.currencyconverter.CurrencyConverterViewModel" />
+    </data>
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -14,8 +21,10 @@
             android:layout_height="35dp"
             android:layout_marginStart="50dp"
             android:layout_marginTop="150dp"
+            app:bindSpinnerAdapter="@{viewModel.spinnerData}"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            tools:setOnItemSelectedListener="@{viewModel.spinnerSelectedListener}" />
 
         <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/switchImg"
@@ -31,47 +40,76 @@
             android:id="@+id/toSpinner"
             android:layout_width="110dp"
             android:layout_height="35dp"
-            android:layout_marginTop="150dp"
-            android:layout_marginEnd="50dp"
+            android:layout_marginTop="148dp"
+            android:layout_marginEnd="48dp"
+            app:bindSpinnerAdapter="@{viewModel.spinnerData}"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            tools:setOnItemSelectedListener="@{viewModel.spinnerSelectedListener}" />
 
         <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/amountEdt"
+            android:id="@+id/fromEdt"
             android:layout_width="110dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="50dp"
             android:layout_marginTop="100dp"
             android:digits="0123456789."
             android:inputType="phone"
-            android:text="1"
+            android:text="@{viewModel.fromTxt}"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/fromSpinner" />
 
         <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/convertedValueEdt"
+            android:id="@+id/toEdt"
             android:layout_width="110dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="100dp"
             android:layout_marginEnd="50dp"
             android:digits="0123456789."
             android:inputType="phone"
+            android:text="@{viewModel.toTxt}"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/toSpinner" />
 
-
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/DetailsBtn"
+            android:id="@+id/detailsBtn"
             android:layout_width="150dp"
-            android:layout_height="50dp"
+            android:layout_height="wrap_content"
             android:layout_marginStart="20dp"
+            android:layout_marginBottom="88dp"
             android:text="Details"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.499"
+            app:layout_constraintHorizontal_bias="0.506"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/otherCurrenciesBtn"
+            android:layout_width="150dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:layout_marginBottom="28dp"
+            android:text="Other Currencies"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.506"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/switchBtn"
-            app:layout_constraintVertical_bias="0.809" />
+            app:layout_constraintTop_toBottomOf="@+id/detailsBtn"
+            app:layout_constraintVertical_bias="0.977" />
+
+        <com.google.android.material.progressindicator.CircularProgressIndicator
+            android:id="@+id/progressBar"
+            android:layout_width="70dp"
+            android:layout_height="70dp"
+            android:layout_centerInParent="true"
+            android:indeterminate="true"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.506"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.346" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>
