@@ -7,9 +7,11 @@ plugins {
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib:1.6.10"
 
-//    //junit
+    //junit
 //    testImplementation 'org.junit.jupiter:junit-jupiter:5.7.1'
 //    implementation 'org.junit.jupiter:junit-jupiter:5.7.1'
+    testImplementation "junit:junit:4.13.2"
+    testImplementation "io.mockk:mockk:1.10.0"
 
     //Coroutines
     testImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.0-native-mt'
