@@ -4,52 +4,49 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/detailsLinear">
 
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/dayTxt"
-            android:layout_width="wrap_content"
+            android:layout_width="135dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
             android:gravity="center"
-            android:text="Day"
+            android:text="03/3/2022 10:09:50,"
             app:counterTextColor="@color/black" />
 
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/fromCurrencyCodeTxt"
-            android:layout_width="wrap_content"
+            android:layout_width="70dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
             android:gravity="center"
-            android:text="From"
+            android:text="AED"
             app:counterTextColor="@color/black" />
 
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/fromCurrencyAmountTxt"
-            android:layout_width="wrap_content"
+            android:layout_width="85dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
             android:gravity="center"
-            android:text="Amount"
+            android:text="68045"
             app:counterTextColor="@color/black" />
 
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/toCurrencyCodeTxt"
-            android:layout_width="wrap_content"
+            android:layout_width="50dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
             android:gravity="center"
-            android:text="To"
+            android:text="AOA"
             app:counterTextColor="@color/black" />
 
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/toCurrencyConvertedTxt"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:text="Value"
+            android:gravity="right"
+            android:text="32.5118545451185454"
             app:counterTextColor="@color/black" />
 
     </LinearLayout>
+
 </layout>
