@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/dayTxt"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="03/3/2022 10:09:50"
+            app:counterTextColor="@color/black" />
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/fromCurrencyCodeTxt"
+            android:layout_width="132dp"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="AED"
+            app:counterTextColor="@color/black" />
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/fromCurrencyAmountTxt"
+            android:layout_width="150dp"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="680456804568045668045680456804566804568045680456"
+            app:counterTextColor="@color/black" />
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/toCurrencyCodeTxt"
+            android:layout_width="112dp"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="AOA"
+            app:counterTextColor="@color/black" />
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/toCurrencyConvertedTxt"
+            android:layout_width="140dp"
+            android:layout_height="wrap_content"
+            android:gravity="right"
+            android:text="1"
+            app:counterTextColor="@color/black" />
+    </LinearLayout>
+
+</layout>
