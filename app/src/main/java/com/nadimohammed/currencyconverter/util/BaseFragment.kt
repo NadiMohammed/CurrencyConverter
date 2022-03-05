@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.Fragment
 
+//here are using our BaseFragment so we can initialise Data Binding so we don't need to initialize it in every activity or fragment
 abstract class BaseFragment<VB : ViewDataBinding> : Fragment() {
 
     private var _binding: VB? = null

@@ -3,23 +3,22 @@ package com.nadimohammed.currencyconverter.ui.currencyconverter
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
-import android.view.MotionEvent
 import android.view.View
-import android.widget.AdapterView
-import android.widget.ArrayAdapter
-import androidx.core.widget.doOnTextChanged
+import android.view.View.OnFocusChangeListener
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigation.Navigation
 import androidx.navigation.findNavController
 import com.nadimohammed.currencyconverter.R
 import com.nadimohammed.currencyconverter.databinding.CurrencyConverterFragmentBinding
 import com.nadimohammed.currencyconverter.util.BaseFragment
-import com.nadimohammed.data.db.DatabaseCurrency
+import com.nadimohammed.currencyconverter.util.Status
+import com.nadimohammed.currencyconverter.util.exceptionHandler
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
-import java.util.*
+
 
 @AndroidEntryPoint
 class CurrencyConverterFragment : BaseFragment<CurrencyConverterFragmentBinding>() {
@@ -28,219 +27,196 @@ class CurrencyConverterFragment : BaseFragment<CurrencyConverterFragmentBinding>
 
     override fun getDataBinding() = CurrencyConverterFragmentBinding.inflate(layoutInflater)
 
-    private var selectedCurrencyPriceFromSpinner: Double = 0.0
-    private var selectedCurrencyPriceToSpinner: Double = 0.0
     private var selectedItemPositionFromSpinner = 0
     private var selectedItemPositionToSpinner = 0
-    private var stopAmountEditTextChangedListener: Boolean = false
-    private var swipeValueFromTo: Boolean = true
+    private var firstSwitch: Boolean = true
+
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        init()
         observe()
         onClick()
-
     }
 
+    /*
+      * I Use This Function To initialize all things will be used when starting
+      * like DataBinding
+      * binding.lifecycleOwner used for observing LiveData with data binding
+      * binding.viewModel = currencyConverterViewModel is used here to set value of viewModel variable in currency_converter_fragment.xml
+      * */
+    private fun init() {
+        binding.lifecycleOwner = this
 
-    private fun observe() {
-        lifecycleScope.launch {
-            currencyConverterViewModel.currencyRate.collect {
-                Log.e("TestResponse1", it.toString())
-                Log.e("TestResponse2", it.rates.toString())
-            }
+        binding.viewModel = currencyConverterViewModel
+    }
+
+    /*
+    * I Use This Function To validate Edittext Input To Avoid Crash
+    * */
+    private fun isValid(): Boolean {
+        if (binding.fromEdt.text!!.isNullOrEmpty()) {
+            binding.fromEdt.error = "يجب كتابه رقم"
+            binding.fromEdt.requestFocus()
+            return false
         }
 
-        lifecycleScope.launch {
+        if (binding.toEdt.text!!.isNullOrEmpty()) {
+            binding.toEdt.error = "يجب كتابه رقم"
+            binding.toEdt.requestFocus()
+            return false
+        }
 
-            currencyConverterViewModel.spinnerData.collect {
-                Log.e("TestResponse2", it.toString())
+        return true
+    }
 
-                val currencyCountryCode = arrayListOf<String>()
-                val currencyPrice = arrayListOf<Double>()
+    /*
+         * I Use This Function To observe variable from ViewModel and update our views when something got change
+         * like when apiStatus got change it update progressBar visibility
+         * and onMessageError when it change it show us the error message
+         * viewLifecycleOwner.lifecycleScope.launch is used to execute the code inside at coroutines
+         * viewLifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) is to code execute when Lifecycle STARTED state and cancels when the Lifecycle is STOPPED
+         * */
+    private fun observe() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
 
-                for (i in 0 until it.size) {
-                    currencyCountryCode.add(it[i].currencyCountryCode)
-                    currencyPrice.add(it[i].currencyPrice)
+                launch {
+                    currencyConverterViewModel.apiStatus.collect {
+                        when (it) {
+                            Status.LOADING -> {
+                                binding.progressBar.visibility = View.VISIBLE
+                            }
+                            Status.SUCCESS -> {
+                                binding.progressBar.visibility = View.GONE
+                            }
+                            Status.ERROR -> {
+                                binding.progressBar.visibility = View.GONE
+                            }
+                        }
+                    }
                 }
 
-                val spinnerAdapter = ArrayAdapter(
-                    requireContext(),
-                    androidx.appcompat.R.layout.support_simple_spinner_dropdown_item,
-                    currencyCountryCode
-                )
-
-                binding.fromSpinner.onItemSelectedListener =
-                    object : AdapterView.OnItemSelectedListener {
-                        override fun onNothingSelected(parent: AdapterView<*>?) {}
-
-                        override fun onItemSelected(
-                            parent: AdapterView<*>?,
-                            view: View?,
-                            position: Int,
-                            id: Long
-                        ) {
-//                            val selectedCurrencyPriceFromSpinner = it[binding.fromSpinner.selectedItemPosition].currencyPrice
-                            selectedCurrencyPriceFromSpinner =
-                                it[binding.fromSpinner.selectedItemPosition].currencyPrice
-
-
-                        }
+                launch {
+                    currencyConverterViewModel.onMessageError.collect {
+                        exceptionHandler(requireContext(), it)
                     }
-
-                binding.toSpinner.onItemSelectedListener =
-                    object : AdapterView.OnItemSelectedListener {
-                        override fun onNothingSelected(parent: AdapterView<*>?) {}
-
-                        override fun onItemSelected(
-                            parent: AdapterView<*>?,
-                            view: View?,
-                            position: Int,
-                            id: Long
-                        ) {
-//                            val selectedCurrencyPriceToSpinner = it[binding.toSpinner.selectedItemPosition].currencyPrice
-                            selectedCurrencyPriceToSpinner =
-                                it[binding.toSpinner.selectedItemPosition].currencyPrice
-
-                        }
-                    }
-
-                binding.fromSpinner.adapter = spinnerAdapter
-                binding.toSpinner.adapter = spinnerAdapter
+                }
 
             }
         }
     }
 
+    /*
+   * I Use This Function to handle all button and EditText Click
+   * */
     private fun onClick() {
 
-        binding.DetailsBtn.setOnClickListener {
+        binding.detailsBtn.setOnClickListener {
             navigateToHistoricalDetails()
         }
 
-        binding.amountEdt.setOnTouchListener(object : View.OnTouchListener {
-            override fun onTouch(v: View?, event: MotionEvent?): Boolean {
-                when (event?.action) {
-                    MotionEvent.ACTION_DOWN -> {
-                        stopAmountEditTextChangedListener = false
-                        Log.e(
-                            "stopAmountEditTextChangedListener1",
-                            stopAmountEditTextChangedListener.toString()
-                        )
-                    } //Do Something
-                }
+        binding.otherCurrenciesBtn.setOnClickListener {
+            navigateToOtherCurrencies()
+        }
 
-                return v?.onTouchEvent(event) ?: true
-            }
-        })
-
-        binding.convertedValueEdt.setOnTouchListener(object : View.OnTouchListener {
-            override fun onTouch(v: View?, event: MotionEvent?): Boolean {
-                when (event?.action) {
-                    MotionEvent.ACTION_DOWN -> {
-                        stopAmountEditTextChangedListener = true
-                        Log.e(
-                            "stopAmountEditTextChangedListener2",
-                            stopAmountEditTextChangedListener.toString()
-                        )
-
-                    }//Do Something
-                }
-
-                return v?.onTouchEvent(event) ?: true
-            }
-        })
-
-        binding.amountEdt.doOnTextChanged { text, start, before, count ->
-
-            if (stopAmountEditTextChangedListener == false) { //No Keep it Work
-
-                if (!binding.amountEdt.text.isNullOrEmpty()) {
-                    binding.convertedValueEdt.setText(
-                        (binding.amountEdt.text.toString()
-                            .toDouble() * selectedCurrencyPriceToSpinner).toString()
+        val fromTextWatcher: TextWatcher = object : TextWatcher {
+            override fun afterTextChanged(s: Editable) {}
+            override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
+                if (isValid()) {
+                    currencyConverterViewModel.handleToEditTextData(
+                        binding.fromEdt.text.toString().toDouble()
                     )
                 }
-
-            } else {
-                return@doOnTextChanged
             }
         }
 
-        binding.convertedValueEdt.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-
-            }
-
-            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-                if (stopAmountEditTextChangedListener == true) { // Yes StopAmountEditTextChangedListener
-
-                    if (!binding.convertedValueEdt.text.isNullOrEmpty()) {
-                        binding.amountEdt.setText(
-                            (binding.convertedValueEdt.text.toString()
-                                .toDouble() * selectedCurrencyPriceFromSpinner).toString()
-                        )
-                    }
+        val toTextWatcher: TextWatcher = object : TextWatcher {
+            override fun afterTextChanged(s: Editable) {}
+            override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
+                if (isValid()) {
+                    currencyConverterViewModel.handleFromEditTextData(
+                        binding.toEdt.text.toString().toDouble()
+                    )
                 }
             }
+        }
 
-            override fun afterTextChanged(p0: Editable?) {
-                val sdf = SimpleDateFormat("dd/M/yyyy hh:mm:ss")
-                val currentDate = sdf.format(Date())
-
-                currencyConverterViewModel.saveConverted(
-                    DatabaseCurrency(
-                        currentDate.toString(),
-                        binding.fromSpinner.selectedItem.toString(),
-                        binding.toSpinner.selectedItem.toString(),
-                        binding.amountEdt.text.toString().toDouble(),
-                        binding.convertedValueEdt.text.toString().toDouble()
-                    )
-                )
+        binding.fromEdt.onFocusChangeListener = OnFocusChangeListener { view, hasFocus ->
+            if (hasFocus) {
+                binding.fromEdt.addTextChangedListener(fromTextWatcher)
+            } else {
+                binding.fromEdt.removeTextChangedListener(fromTextWatcher)
             }
+        }
 
-        })
-
-
-//        binding.convertedValueEdt.doOnTextChanged { text, start, before, count ->
-//            if (stopAmountEditTextChangedListener == true) { // Yes StopAmountEditTextChangedListener
-//
-//                if (!binding.convertedValueEdt.text.isNullOrEmpty()) {
-//                    binding.amountEdt.setText(
-//                        (binding.convertedValueEdt.text.toString()
-//                            .toDouble() * selectedCurrencyPriceFromSpinner).toString()
-//                    )
-//                }
-//
-//            } else {
-//                return@doOnTextChanged
-//            }
-//        }
+        binding.toEdt.onFocusChangeListener = OnFocusChangeListener { view, hasFocus ->
+            if (hasFocus) {
+                binding.toEdt.addTextChangedListener(toTextWatcher)
+            } else {
+                binding.toEdt.removeTextChangedListener(toTextWatcher)
+            }
+        }
 
         binding.switchImg.setOnClickListener {
-            selectedItemPositionFromSpinner = binding.fromSpinner.selectedItemPosition
-            selectedItemPositionToSpinner = binding.toSpinner.selectedItemPosition
-            binding.fromSpinner.setSelection(selectedItemPositionToSpinner)
-            binding.toSpinner.setSelection(selectedItemPositionFromSpinner)
-            binding.amountEdt.text = binding.convertedValueEdt.text
 
-//            val sdf = SimpleDateFormat("dd/M/yyyy hh:mm:ss")
-//            val currentDate = sdf.format(Date())
-//
-//            currencyConverterViewModel.saveConverted(DatabaseCurrency(currentDate.toString()))
+            if (firstSwitch == false && isValid()) {
+                currencyConverterViewModel.switchToFrom.value = false
+                currencyConverterViewModel.switchFromTo.value = true
 
-            Log.e("getselectedItem1", binding.fromSpinner.selectedItem.toString())
-            Log.e("getselectedItem2", selectedCurrencyPriceFromSpinner.toString())
-            Log.e("getselectedItem3", selectedCurrencyPriceToSpinner.toString())
-//            Log.e("currentDate", currentDate.toString())
+                selectedItemPositionToSpinner = binding.toSpinner.selectedItemPosition
+                selectedItemPositionFromSpinner = binding.fromSpinner.selectedItemPosition
+
+                binding.fromSpinner.setSelection(selectedItemPositionToSpinner) //selectedItemPositionToSpinner
+                binding.toSpinner.setSelection(selectedItemPositionFromSpinner) //selectedItemPositionFromSpinner
+
+                currencyConverterViewModel.handleSwitchButtonClick(
+                    binding.fromEdt.text.toString().toDouble()
+                )
+                firstSwitch = true
+                return@setOnClickListener
+
+            }
+
+            if (firstSwitch == true && isValid()) {
+                currencyConverterViewModel.switchToFrom.value = true
+                currencyConverterViewModel.switchFromTo.value = false
+
+                selectedItemPositionToSpinner = binding.toSpinner.selectedItemPosition
+                selectedItemPositionFromSpinner = binding.fromSpinner.selectedItemPosition
+
+                binding.fromSpinner.setSelection(selectedItemPositionToSpinner) //selectedItemPositionToSpinner
+                binding.toSpinner.setSelection(selectedItemPositionFromSpinner) //selectedItemPositionFromSpinner
+
+                currencyConverterViewModel.handleSwitchButtonClick(
+                    binding.fromEdt.text.toString().toDouble()
+                )
+                firstSwitch = false
+                return@setOnClickListener
+            }
+
         }
-
     }
 
+    /*
+* I Use This Function to navigate from currencyConverterFragment to historicalDetailsFragment
+* */
     private fun navigateToHistoricalDetails() {
         requireView().findNavController()
             .navigate(R.id.action_currencyConverterFragment_to_historicalDetailsFragment)
+    }
+
+    //here we are passing data(selected country code and currency amount) to OtherCurrenciesFragment
+    private fun navigateToOtherCurrencies() {
+        Navigation.findNavController(requireView()).navigate(
+            CurrencyConverterFragmentDirections.actionCurrencyConverterFragmentToOtherCurrenciesFragment(
+                binding.fromSpinner.selectedItem.toString(),
+                binding.fromEdt.text.toString().toFloat()
+            )
+        )
     }
 
 }
