@@ -11,9 +11,23 @@
         <action
             android:id="@+id/action_currencyConverterFragment_to_historicalDetailsFragment"
             app:destination="@id/historicalDetailsFragment" />
+        <action
+            android:id="@+id/action_currencyConverterFragment_to_otherCurrenciesFragment"
+            app:destination="@id/otherCurrenciesFragment" />
     </fragment>
     <fragment
         android:id="@+id/historicalDetailsFragment"
         android:name="com.nadimohammed.currencyconverter.ui.details.HistoricalDetailsFragment"
         android:label="HistoricalDetailsFragment" />
+    <fragment
+        android:id="@+id/otherCurrenciesFragment"
+        android:name="com.nadimohammed.currencyconverter.ui.othercurrencies.OtherCurrenciesFragment"
+        android:label="OtherCurrenciesFragment" >
+        <argument
+            android:name="currencyCodeToConvert"
+            app:argType="string" />
+        <argument
+            android:name="currencyRateToConvert"
+            app:argType="float" />
+    </fragment>
 </navigation>
