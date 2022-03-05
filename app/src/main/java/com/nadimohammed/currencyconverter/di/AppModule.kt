@@ -1,13 +1,13 @@
 package com.nadimohammed.currencyconverter.di
 
 import android.content.Context
+import androidx.room.Room
 import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
 import com.nadimohammed.data.BuildConfig
-import androidx.room.Room
 import com.nadimohammed.data.api.CurrencyApi
 import com.nadimohammed.data.db.CurrencyDAO
 import com.nadimohammed.data.db.MainDatabase
-import com.nadimohammed.data.repository.CurrencyRemoteDataSource
+import com.nadimohammed.data.repository.CurrencyRemoteDataSourceImpl
 import com.nadimohammed.domain.repository.CurrencyRepository
 import dagger.Binds
 import dagger.Module
@@ -67,7 +67,8 @@ object AppModule {
 
     @Singleton
     @Provides
-    fun provideCurrencyApi(retrofit: Retrofit): CurrencyApi = retrofit.create(CurrencyApi::class.java)
+    fun provideCurrencyApi(retrofit: Retrofit): CurrencyApi =
+        retrofit.create(CurrencyApi::class.java)
 
     @Provides
     @Singleton
@@ -86,6 +87,6 @@ object AppModule {
 abstract class DataModule {
 
     @Binds
-    abstract fun bindCurrencyRepository(currencyRemoteDataSource: CurrencyRemoteDataSource): CurrencyRepository
+    abstract fun bindCurrencyRepository(currencyRemoteDataSourceImpl: CurrencyRemoteDataSourceImpl): CurrencyRepository
 
 }
